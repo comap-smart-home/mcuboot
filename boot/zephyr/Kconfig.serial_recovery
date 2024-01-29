@@ -132,10 +132,14 @@ endif # ENABLE_MGMT_PERUSER
 
 menu "Entrance methods"
 
+config BOOT_SERIAL_DFU_HAS_ENTRANCE_TIMEOUT
+	bool "DFU need entrance timeout utils"
+
 menuconfig BOOT_SERIAL_ENTRANCE_GPIO
 	bool "GPIO"
 	default y
 	depends on GPIO
+	select BOOT_SERIAL_DFU_HAS_ENTRANCE_TIMEOUT
 	help
 	  Use a GPIO to enter serial recovery mode.
 
@@ -151,6 +155,7 @@ config BOOT_SERIAL_DETECT_DELAY
 menuconfig BOOT_SERIAL_WAIT_FOR_DFU
 	bool "Wait a prescribed duration to see if DFU is invoked by receiving a MCUmgr comand"
 	depends on BOOT_SERIAL_UART || BOOT_SERIAL_CDC_ACM
+	select BOOT_SERIAL_DFU_HAS_ENTRANCE_TIMEOUT
 	help
 	  If y, MCUboot waits for a prescribed duration of time to allow
 	  for DFU to be invoked. The serial recovery can be entered by receiving any
@@ -158,8 +163,8 @@ menuconfig BOOT_SERIAL_WAIT_FOR_DFU
 
 config BOOT_SERIAL_WAIT_FOR_DFU_TIMEOUT
 	int "Duration to wait for the serial DFU timeout in ms"
-	default 500
-	depends on BOOT_SERIAL_WAIT_FOR_DFU
+	default 5000
+	depends on BOOT_SERIAL_DFU_HAS_ENTRANCE_TIMEOUT
 	help
 	  Timeout in ms for MCUboot to wait to allow for DFU to be invoked.
 
@@ -180,6 +185,7 @@ config BOOT_SERIAL_NO_APPLICATION
 config BOOT_SERIAL_PIN_RESET
 	bool "Check for device reset by pin"
 	select HWINFO
+	select BOOT_SERIAL_DFU_HAS_ENTRANCE_TIMEOUT
 	help
 	  Checks if the module reset was caused by the reset pin and will
 	  remain in bootloader serial recovery mode if it was.

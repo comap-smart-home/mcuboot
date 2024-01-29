@@ -523,7 +523,11 @@ static void boot_serial_enter()
     BOOT_LOG_INF("Enter the serial recovery mode");
     rc = boot_console_init();
     __ASSERT(rc == 0, "Error initializing boot console.\n");
+#if CONFIG_BOOT_SERIAL_WAIT_FOR_DFU_TIMEOUT == 0
     boot_serial_start(&boot_funcs);
+#else
+    boot_serial_check_start(&boot_funcs, CONFIG_BOOT_SERIAL_WAIT_FOR_DFU_TIMEOUT);
+#endif
     __ASSERT(0, "Bootloader serial process was terminated unexpectedly.\n");
 }
 #endif
