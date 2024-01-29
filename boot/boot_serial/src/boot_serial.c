@@ -1047,7 +1047,7 @@ boot_serial_input(char *buf, int len)
     } else {
         bs_rc_rsp(MGMT_ERR_ENOTSUP);
     }
-#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU
+#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU_UTILS
     bs_entry = true;
 #endif
 }
@@ -1204,7 +1204,7 @@ boot_serial_read_console(const struct boot_uart_funcs *f,int timeout_in_ms)
     int max_input;
     int elapsed_in_ms = 0;
 
-#ifndef MCUBOOT_SERIAL_WAIT_FOR_DFU
+#ifndef MCUBOOT_SERIAL_WAIT_FOR_DFU_UTILS
     bool allow_idle = true;
 #endif
 
@@ -1218,19 +1218,19 @@ boot_serial_read_console(const struct boot_uart_funcs *f,int timeout_in_ms)
          * used as otherwise the boot process hangs forever, waiting for input
          * from serial console (if single-thread mode is used).
          */
-#ifndef MCUBOOT_SERIAL_WAIT_FOR_DFU
+#ifndef MCUBOOT_SERIAL_WAIT_FOR_DFU_UTILS
         if (allow_idle == true) {
             MCUBOOT_CPU_IDLE();
             allow_idle = false;
         }
 #endif
         MCUBOOT_WATCHDOG_FEED();
-#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU
+#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU_UTILS
         uint32_t start = k_uptime_get_32();
 #endif
         rc = f->read(in_buf + off, sizeof(in_buf) - off, &full_line);
         if (rc <= 0 && !full_line) {
-#ifndef MCUBOOT_SERIAL_WAIT_FOR_DFU
+#ifndef MCUBOOT_SERIAL_WAIT_FOR_DFU_UTILS
             allow_idle = true;
 #endif
             goto check_timeout;
@@ -1261,7 +1261,7 @@ boot_serial_read_console(const struct boot_uart_funcs *f,int timeout_in_ms)
         off = 0;
 check_timeout:
         /* Subtract elapsed time */
-#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU
+#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU_UTILS
         elapsed_in_ms = (k_uptime_get_32() - start);
 #endif
         timeout_in_ms -= elapsed_in_ms;
@@ -1279,7 +1279,7 @@ boot_serial_start(const struct boot_uart_funcs *f)
     boot_serial_read_console(f,0);
 }
 
-#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU
+#ifdef MCUBOOT_SERIAL_WAIT_FOR_DFU_UTILS
 /*
  * Task which waits reading console for a certain amount of timeout.
  * If within this timeout no mcumgr command is received, the function is
